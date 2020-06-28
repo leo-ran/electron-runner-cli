@@ -6,6 +6,10 @@ import ora from "ora";
 import download from "download-git-repo";
 import path from "path";
 import inquirer from "inquirer";
+import electronBuild from "electron-builder";
+import electronRebuild from "electron-rebuild";
+import {start} from "./start";
+import {build} from "./build";
 
 const cwd = process.cwd();
 const VERSION = require("../package").version;
@@ -82,20 +86,25 @@ program
   .description("使用开发环境启动项目")
   .action(() => {
     process.env.NODE_ENV = "development";
+    start();
   });
 
 program
   .command("build")
   .description("编译生产项目")
-  .action(() => {
+  .action(async () => {
     process.env.NODE_ENV = "production";
+     await build();
+     // 启动electronBuild编译
+     spawn(electronBuild);
   });
 
 program
   .command("rebuild")
   .description("重新编译c++ 模块")
   .action(() => {
-
+      // 重新编译
+      spawn(electronRebuild);
   })
 
 program.parse(process.argv);

@@ -1,4 +1,5 @@
 import {Configuration, RuleSetUseItem} from "webpack";
+import {Configuration as DevServerConfiguration} from "webpack-dev-server";
 import * as path from "path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
@@ -40,10 +41,14 @@ const sassLoaderOption: RuleSetUseItem = {
     sourceMap: false,
   }
 }
+const devServerOption: DevServerConfiguration = {
+  compress: true,
+  port: 9080
+}
 
 export const rendererConfig: Configuration = {
   mode: isProduction ? "production" : "development",
-  entry: path.join(sourcePath, "renderer", "index.ts"),
+  entry: [path.join(sourcePath, "renderer", "index.ts")],
   resolve: {
     // Add `.ts` and `.tsx` as a resolvable extension.
     extensions: [".ts", ".tsx", ".js", ".jsx", ".json", ".node"]
@@ -163,6 +168,7 @@ export const rendererConfig: Configuration = {
     } : false
   },
   target: buildType,
+  devServer: devServerOption,
 };
 
 if (isProduction && rendererConfig.plugins) {
