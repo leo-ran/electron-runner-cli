@@ -9,7 +9,7 @@ import inquirer from "inquirer";
 
 const cwd = process.cwd();
 const VERSION = require("../package").version;
-const repo = "http://111.231.196.120:8099/ranyunlong/electron-template";
+const repo = "leo-ran/electron-template";
 const { spawn } = require("child_process")
 
 program.version(VERSION,"-v, --version");
@@ -60,7 +60,7 @@ program
     const spinner = ora("开始下载模板文件").start();
     download(`${repo}#react-${template}`, path.join(cwd, projectName), (err) => {
       if(err){
-        spinner.fail("下载出现异常，请重试！");
+        spinner.fail(`模板下载失败，或不存在模板${template}！`);
         throw err;
       }
 
