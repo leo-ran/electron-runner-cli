@@ -7,7 +7,7 @@ import OptimizeCssAssetsPlugin from "optimize-css-assets-webpack-plugin";
 import * as webpack from "webpack";
 import merge from "webpack-merge";
 import fs from "fs";
-import {ElectronRunnerConfig} from "./interface";
+import {ElectronRunnerConfig} from "./index";
 
 const isProduction = process.env.NODE_ENV === 'production';
 const buildType = (process.env.NODE_ENV_TYPE || "web") as  "web" | "electron-renderer";
