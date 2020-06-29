@@ -9,7 +9,7 @@ import * as webpack from "webpack";
 const isProduction = process.env.NODE_ENV === 'production';
 const buildType = (process.env.NODE_ENV_TYPE || "web") as  "web" | "electron-renderer";
 const cwd = process.cwd();
-const sourcePath = path.join(cwd, "src");
+const sourcePath = path.join(cwd, "src", "renderer");
 const styleLoader = (isModule: boolean = false): RuleSetUseItem[] => {
   return [
     ...(isProduction ? [
@@ -43,12 +43,18 @@ const sassLoaderOption: RuleSetUseItem = {
 }
 const devServerOption: DevServerConfiguration = {
   compress: true,
-  port: 9080
+  port: 9080,
+  stats: {
+    colors: true,
+    chunks: false,
+    assets: true,
+    modules: false
+  },
 }
 
 export const rendererConfig: Configuration = {
   mode: isProduction ? "production" : "development",
-  entry: [path.join(sourcePath, "renderer", "index.ts")],
+  entry: [path.join(sourcePath, "index.ts")],
   resolve: {
     // Add `.ts` and `.tsx` as a resolvable extension.
     extensions: [".ts", ".tsx", ".js", ".jsx", ".json", ".node"]

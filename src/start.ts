@@ -1,7 +1,6 @@
 import ora from "ora";
 import path from "path";
 import webpack from "webpack";
-import * as electron from "electron";
 import {ChildProcessWithoutNullStreams, spawn} from "child_process";
 import webpackHotMiddleware from "webpack-hot-middleware";
 import WebpackDevServer from "webpack-dev-server";
@@ -13,6 +12,7 @@ let mainProcess: ChildProcessWithoutNullStreams | null;
 let manualRestart: boolean = false;
 
 const spinner = ora('开始编译... \n').start();
+const electron = require("electron");
 
 /**
  * 运行主进程代码编译
@@ -67,17 +67,19 @@ function runRendererBundle(): Promise<any> {
     }
     return new Promise((r, j) => {
         const compiler = webpack(rendererConfig);
-        new WebpackDevServer(compiler, {
+        const server = new WebpackDevServer(compiler, {
             ...rendererConfig.devServer,
             before (app) {
                 app.use(webpackHotMiddleware(compiler,{
                     log: false,
-                    heartbeat: 2500
+                    path: "/__what",
+                    heartbeat: 2000
                 }));
                 spinner.succeed("web进程已启动");
                 r();
             }
         });
+        server.listen(rendererConfig.devServer ? rendererConfig.devServer.port || 9080 : 9080);
         compiler.hooks.failed.tap("ElectronRendererError",() => j());
     });
 }
@@ -87,7 +89,7 @@ function runRendererBundle(): Promise<any> {
  */
 function startElectron(){
     spinner.succeed("启动Electron进程中...")
-    mainProcess = spawn(electron as any,[path.resolve("dist","main","index.js")])
+    mainProcess = spawn(electron,[path.resolve("dist","main","main.js")])
     mainProcess.stdout.on('data',data=>{
         let text = ''
         data = data.toString().split(/\r?\n/)

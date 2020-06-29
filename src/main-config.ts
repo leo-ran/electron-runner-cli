@@ -3,7 +3,7 @@ import path from "path";
 const isProduction = process.env.NODE_ENV === "production"
 
 const cwd = process.cwd();
-const sourcePath = path.join(cwd, "main");
+const sourcePath = path.join(cwd, "src", "main");
 
 export const mainConfig: Configuration = {
   entry: path.join(sourcePath, "index.ts"),

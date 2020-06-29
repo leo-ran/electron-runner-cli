@@ -6,10 +6,6 @@ import ora from "ora";
 import download from "download-git-repo";
 import path from "path";
 import inquirer from "inquirer";
-import electronBuild from "electron-builder";
-import electronRebuild from "electron-rebuild";
-import {start} from "./start";
-import {build} from "./build";
 
 const cwd = process.cwd();
 const VERSION = require("../package").version;
@@ -37,7 +33,7 @@ program
 
     const {isInstall} = await inquirer.prompt<{isInstall: boolean}>({
       type: "confirm",
-      name: "install",
+      name: "isInstall",
       message:"是否自动安装依赖?",
       default:true
     });
@@ -69,7 +65,6 @@ program
       }
 
       spinner.succeed('模板下载成功！');
-
       if (isInstall && installType) {
         const installSpinner = ora("开始安装依赖").start();
         install(installType, projectName).then(() => {
@@ -86,6 +81,7 @@ program
   .description("使用开发环境启动项目")
   .action(() => {
     process.env.NODE_ENV = "development";
+    const {start} = require("./start");
     start();
   });
 
@@ -94,9 +90,10 @@ program
   .description("编译生产项目")
   .action(async () => {
     process.env.NODE_ENV = "production";
+      const {build} = require("./build");
      await build();
      // 启动electronBuild编译
-     spawn(electronBuild);
+     spawn(require("electron-builder"));
   });
 
 program
@@ -104,7 +101,7 @@ program
   .description("重新编译c++ 模块")
   .action(() => {
       // 重新编译
-      spawn(electronRebuild);
+      spawn(require("electron-rebuild"));
   })
 
 program.parse(process.argv);
