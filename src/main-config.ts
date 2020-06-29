@@ -6,7 +6,7 @@ const cwd = process.cwd();
 const sourcePath = path.join(cwd, "src", "main");
 
 export const mainConfig: Configuration = {
-  entry: path.join(sourcePath, "index.ts"),
+  entry: sourcePath,
   output:{
     filename:  "[name].js",
     libraryTarget: "commonjs2",
@@ -29,5 +29,6 @@ export const mainConfig: Configuration = {
     extensions: [".ts", ".json", ".node"]
   },
   target: "electron-main",
+  stats: isProduction ? "normal" : "errors-warnings",
   mode: isProduction ? "production" : "development",
 }

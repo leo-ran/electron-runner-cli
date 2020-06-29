@@ -5,6 +5,9 @@ import HtmlWebpackPlugin from "html-webpack-plugin";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import OptimizeCssAssetsPlugin from "optimize-css-assets-webpack-plugin";
 import * as webpack from "webpack";
+import merge from "webpack-merge";
+import fs from "fs";
+import {ElectronRunnerConfig} from "./interface";
 
 const isProduction = process.env.NODE_ENV === 'production';
 const buildType = (process.env.NODE_ENV_TYPE || "web") as  "web" | "electron-renderer";
@@ -15,9 +18,6 @@ const styleLoader = (isModule: boolean = false): RuleSetUseItem[] => {
     ...(isProduction ? [
       MiniCssExtractPlugin.loader,
     ] : []),
-    {
-      loader: "style-loader",
-    },
     {
       loader: "css-loader",
       options: {
@@ -44,17 +44,12 @@ const sassLoaderOption: RuleSetUseItem = {
 const devServerOption: DevServerConfiguration = {
   compress: true,
   port: 9080,
-  stats: {
-    colors: true,
-    chunks: false,
-    assets: true,
-    modules: false
-  },
+  stats: isProduction ? "normal" : "errors-warnings",
 }
 
-export const rendererConfig: Configuration = {
+let _rendererConfig: Configuration = {
   mode: isProduction ? "production" : "development",
-  entry: [path.join(sourcePath, "index.ts")],
+  entry: [sourcePath],
   resolve: {
     // Add `.ts` and `.tsx` as a resolvable extension.
     extensions: [".ts", ".tsx", ".js", ".jsx", ".json", ".node"]
@@ -68,34 +63,6 @@ export const rendererConfig: Configuration = {
       {
         test: /\.module.css$/,
         use: styleLoader(true)
-      },
-      {
-        test: /\.less$/,
-        use: [
-          ...styleLoader(),
-          lessLoaderOption,
-        ]
-      },
-      {
-        test: /\.module.less$/,
-        use: [
-          ...styleLoader(true),
-          lessLoaderOption,
-        ]
-      },
-      {
-        test: /\.s[ac]ss$/i,
-        use: [
-          ...styleLoader(),
-          sassLoaderOption,
-        ]
-      },
-      {
-        test: /\.module.s[ac]ss$/i,
-        use: [
-          ...styleLoader(true),
-          sassLoaderOption,
-        ]
       },
       {
         test: /\.tsx?$/,
@@ -152,14 +119,24 @@ export const rendererConfig: Configuration = {
     libraryTarget: 'umd'
   },
   plugins: [
-    new webpack.ProgressPlugin(),
     // https://github.com/jantimon/html-webpack-plugin
     new HtmlWebpackPlugin({
       filename: 'index.html',
       template: path.resolve('public', 'index.html'),
       minify: isProduction,
     }),
-    new webpack.HotModuleReplacementPlugin(),
+    ...(
+      !isProduction ? [
+        new webpack.HotModuleReplacementPlugin(),
+      ] : [
+        // https://github.com/webpack-contrib/mini-css-extract-plugin
+        new MiniCssExtractPlugin({
+          filename: "styles/[name].css"
+        }),
+        // https://github.com/NMFR/optimize-css-assets-webpack-plugin
+        new OptimizeCssAssetsPlugin({})
+      ]
+    )
   ],
   optimization: {
     minimize: isProduction,
@@ -174,16 +151,83 @@ export const rendererConfig: Configuration = {
     } : false
   },
   target: buildType,
+  stats: isProduction ? "normal" : "errors-warnings",
   devServer: devServerOption,
 };
+const reConfigPath = path.join(cwd, "electron.config.js");
 
-if (isProduction && rendererConfig.plugins) {
-  rendererConfig.plugins.push(
-    // https://github.com/webpack-contrib/mini-css-extract-plugin
-    new MiniCssExtractPlugin({
-      filename: "styles/[name].css"
-    }),
-    // https://github.com/NMFR/optimize-css-assets-webpack-plugin
-    new OptimizeCssAssetsPlugin({})
-  )
+function createLessConfig(lessLoaderOption: RuleSetUseItem) {
+  return [
+    {
+      test: /\.less$/,
+      use: [
+        ...styleLoader(),
+        lessLoaderOption,
+      ]
+    },
+    {
+      test: /\.module.less$/,
+      use: [
+        ...styleLoader(true),
+        lessLoaderOption,
+      ]
+    },
+  ]
 }
+
+function createSassConfig(sassLoaderOption: RuleSetUseItem) {
+  return [
+    {
+      test: /\.s[ac]ss$/i,
+      use: [
+        ...styleLoader(),
+        sassLoaderOption,
+      ]
+    },
+    {
+      test: /\.module.s[ac]ss$/i,
+      use: [
+        ...styleLoader(true),
+        sassLoaderOption,
+      ]
+    },
+  ]
+}
+
+if (_rendererConfig.module) {
+  if (fs.existsSync(reConfigPath)) {
+    const config: ElectronRunnerConfig = require(reConfigPath);
+    if (typeof config === "object") {
+      if (typeof config.less === "function") {
+        _rendererConfig.module.rules.push(...createLessConfig(config.less(lessLoaderOption)))
+      }
+
+      if (typeof config.sass === "function") {
+        _rendererConfig.module.rules.push(...createSassConfig(config.sass(sassLoaderOption)))
+      }
+
+      if (config.devServer) {
+        _rendererConfig.devServer = {
+          ..._rendererConfig.devServer,
+          ...config.devServer,
+        }
+      }
+
+      if (config.webpack) {
+        _rendererConfig = merge(_rendererConfig, config.webpack)
+      }
+    } else {
+      _rendererConfig.module.rules.push(
+        ...createLessConfig(lessLoaderOption),
+        ...createSassConfig(sassLoaderOption)
+      )
+    }
+  } else {
+    _rendererConfig.module.rules.push(
+      ...createLessConfig(lessLoaderOption),
+      ...createSassConfig(sassLoaderOption)
+    )
+  }
+}
+
+export const rendererConfig = _rendererConfig;

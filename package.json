@@ -1,8 +1,11 @@
 {
   "name": "@electron-runner/cli",
   "version": "1.0.0",
-  "description": "electron bootstrap app",
+  "description": "This is a running tool for electron applications, including the project basic development template.",
   "main": "./dist/index.js",
+  "bin": {
+    "electron-runner": "./dist/index.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -12,6 +15,7 @@
   ],
   "author": "ranyunlong",
   "license": "MIT",
+  "repository": "leo-ran/electron-runner-cli",
   "devDependencies": {
     "sass": "^1.26.9",
     "sass-loader": "^8.0.2"
@@ -26,6 +30,7 @@
     "@types/webpack": "^4.41.18",
     "@types/webpack-dev-server": "^3.11.0",
     "@types/webpack-hot-middleware": "^2.25.3",
+    "@types/webpack-merge": "^4.1.5",
     "babel-loader": "^8.1.0",
     "chalk": "^4.1.0",
     "commander": "^5.1.0",
@@ -33,8 +38,6 @@
     "css-loader": "^3.6.0",
     "download-git-repo": "^3.0.2",
     "electron": "^9.0.5",
-    "electron-builder": "^22.7.0",
-    "electron-rebuild": "^1.11.0",
     "file-loader": "^6.0.0",
     "html-webpack-plugin": "^4.3.0",
     "inquirer": "^7.2.0",

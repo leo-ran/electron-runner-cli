@@ -91,18 +91,8 @@ program
   .action(async () => {
     process.env.NODE_ENV = "production";
       const {build} = require("./build");
-     await build();
-     // 启动electronBuild编译
-     spawn(require("electron-builder"));
+      await build();
   });
-
-program
-  .command("rebuild")
-  .description("重新编译c++ 模块")
-  .action(() => {
-      // 重新编译
-      spawn(require("electron-rebuild"));
-  })
 
 program.parse(process.argv);
 

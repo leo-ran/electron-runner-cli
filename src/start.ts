@@ -9,7 +9,7 @@ import {rendererConfig} from "./renderer-config";
 import logger from "./lib/logger";
 
 let mainProcess: ChildProcessWithoutNullStreams | null;
-let manualRestart: boolean = false;
+let electronRestart: boolean = false;
 
 const spinner = ora('开始编译... \n').start();
 const electron = require("electron");
@@ -19,26 +19,26 @@ const electron = require("electron");
  */
 function runMainBundle(): Promise<any> {
     return new Promise((r, j) => {
-        const compiler  = webpack(mainConfig);
+        const compiler = webpack(mainConfig);
         compiler.watch({}, (err, stats) => {
             if (err) throw err;
             spinner.succeed('主进程编译开始...');
-            console.log(stats.toString({
-                chunks: false,
-                colors:true
-            }));
-
+            // 只输出错误信息
+            if (stats.hasErrors()) {
+                console.log(stats.toString({
+                    chunks: false,
+                    colors:true,
+                }));
+            }
             if (mainProcess && mainProcess.kill){
 
                 // 主进程设置为热重启状态
-                manualRestart = true;
+                electronRestart = true;
 
                 // 监听主进程关闭事件
                 mainProcess.on('close',() => {
                     // 设置主进程为非热重启状态
-                    manualRestart = false;
-                    // 提示重启进程
-                    spinner.succeed('进程重启中...')
+                    electronRestart = false;
                 })
                 // 杀死electron进程
                 process.kill(mainProcess.pid);
@@ -113,8 +113,7 @@ function startElectron(){
     })
 
     mainProcess.on('close', () => {
-        spinner.fail('退出进程!')
-        if(!manualRestart) process.exit()
+        if(!electronRestart) process.exit()
     })
 
     spinner.succeed("Electron进程已启动!")
