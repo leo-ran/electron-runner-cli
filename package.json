@@ -1,6 +1,6 @@
 {
   "name": "@electron-runner/cli",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This is a running tool for electron applications, including the project basic development template.",
   "main": "./dist/index.js",
   "bin": {
@@ -16,10 +16,6 @@
   "author": "ranyunlong",
   "license": "MIT",
   "repository": "leo-ran/electron-runner-cli",
-  "devDependencies": {
-    "sass": "^1.26.9",
-    "sass-loader": "^8.0.2"
-  },
   "dependencies": {
     "@babel/core": "^7.10.3",
     "@babel/preset-env": "^7.10.3",
@@ -52,6 +48,8 @@
     "webpack": "^4.43.0",
     "webpack-dev-server": "^3.11.0",
     "webpack-hot-middleware": "^2.25.0",
-    "webpack-merge": "^4.2.2"
+    "webpack-merge": "^4.2.2",
+    "sass": "^1.26.9",
+    "sass-loader": "^8.0.2"
   }
 }

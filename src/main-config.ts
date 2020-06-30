@@ -22,11 +22,11 @@ export const mainConfig: Configuration = {
     ]
   },
   node: {
-    __dirname: isProduction,
-    __filename: isProduction
+    __dirname: !isProduction,
+    __filename: !isProduction
   },
   resolve: {
-    extensions: [".ts", ".json", ".node"]
+    extensions: [".ts",  ".js",".json", ".node"]
   },
   target: "electron-main",
   stats: isProduction ? "normal" : "errors-warnings",

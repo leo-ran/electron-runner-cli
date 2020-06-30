@@ -66,11 +66,11 @@ program
 
       spinner.succeed('模板下载成功！');
       if (isInstall && installType) {
-        const installSpinner = ora("开始安装依赖").start();
+        spinner.succeed('开始安装依赖！');
         install(installType, projectName).then(() => {
-          installSpinner.succeed("安装完毕！")
+          spinner.succeed("安装完毕！")
         }).catch(() => {
-          installSpinner.fail("安装失败，请重试！")
+          spinner.fail("安装失败，请重试！")
         })
       }
     })
@@ -81,7 +81,7 @@ program
   .description("使用开发环境启动项目")
   .action(() => {
     process.env.NODE_ENV = "development";
-    process.env.NODE_ENV_TYPE = "electron-renderer";
+    process.env.NODE_RENDERER_TYPE = "electron-renderer";
     const {start} = require("./start");
     start();
   });
@@ -91,7 +91,7 @@ program
   .description("编译生产项目")
   .action(async () => {
     process.env.NODE_ENV = "production";
-    process.env.NODE_ENV_TYPE = "electron-renderer";
+    process.env.NODE_RENDERER_TYPE = "electron-renderer";
       const {build} = require("./build");
       await build();
   });

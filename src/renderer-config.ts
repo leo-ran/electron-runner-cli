@@ -10,7 +10,7 @@ import fs from "fs";
 import {ElectronRunnerConfig} from "./index";
 
 const isProduction = process.env.NODE_ENV === 'production';
-const buildType = (process.env.NODE_ENV_TYPE || "web") as  "web" | "electron-renderer";
+const buildType = (process.env.NODE_RENDERER_TYPE || "web") as  "web" | "electron-renderer";
 const cwd = process.cwd();
 const sourcePath = path.join(cwd, "src", "renderer");
 const styleLoader = (isModule: boolean = false): RuleSetUseItem[] => {
@@ -117,6 +117,10 @@ let _rendererConfig: Configuration = {
     path: path.join(cwd, "dist", "renderer"),
     filename: `[name].js`,
     libraryTarget: 'umd'
+  },
+  node: {
+    __dirname: false,
+    __filename: false,
   },
   plugins: [
     // https://github.com/jantimon/html-webpack-plugin
