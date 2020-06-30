@@ -1,6 +1,6 @@
 {
   "name": "@electron-runner/cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "This is a running tool for electron applications, including the project basic development template.",
   "main": "./dist/index.js",
   "bin": {
@@ -19,6 +19,7 @@
   "dependencies": {
     "@babel/core": "^7.10.3",
     "@babel/preset-env": "^7.10.3",
+    "@babel/preset-react": "^7.10.4",
     "@types/inquirer": "^6.5.0",
     "@types/mini-css-extract-plugin": "^0.9.1",
     "@types/node": "^14.0.14",
@@ -42,14 +43,14 @@
     "mini-css-extract-plugin": "^0.9.0",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
     "ora": "^4.0.4",
+    "sass": "^1.26.9",
+    "sass-loader": "^8.0.2",
     "style-loader": "^1.2.1",
     "ts-loader": "^7.0.5",
     "typescript": "^3.9.5",
     "webpack": "^4.43.0",
     "webpack-dev-server": "^3.11.0",
     "webpack-hot-middleware": "^2.25.0",
-    "webpack-merge": "^4.2.2",
-    "sass": "^1.26.9",
-    "sass-loader": "^8.0.2"
+    "webpack-merge": "^4.2.2"
   }
 }
