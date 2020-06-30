@@ -217,10 +217,14 @@ if (_rendererConfig.module) {
         if (typeof config === "object") {
             if (typeof config.less === "function") {
                 _rendererConfig.module.rules.push(...createLessConfig(config.less(lessLoaderOption)))
+            } else {
+                _rendererConfig.module.rules.push(...createLessConfig(lessLoaderOption))
             }
 
             if (typeof config.sass === "function") {
                 _rendererConfig.module.rules.push(...createSassConfig(config.sass(sassLoaderOption)))
+            } else {
+                _rendererConfig.module.rules.push(...createSassConfig(sassLoaderOption))
             }
 
             if (config.devServer) {

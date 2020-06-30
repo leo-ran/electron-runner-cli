@@ -1,6 +1,6 @@
 {
   "name": "@electron-runner/cli",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "This is a running tool for electron applications, including the project basic development template.",
   "main": "./dist/index.js",
   "bin": {
