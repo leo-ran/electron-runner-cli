@@ -97,30 +97,30 @@ let _rendererConfig: Configuration = {
             {
                 test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
                 use: {
-                    loader: 'file-loader',
+                    loader: "file-loader",
                     options: {
                         limit: 10000,
-                        name: isProduction ? 'images/[name].[ext]' : 'images/[name].[hash:7].[ext]'
+                        name: isProduction ? "styles/images/[name].[ext]" : "styles/images/[name].[hash:7].[ext]"
                     }
                 }
             },
             {
                 test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
                 use: {
-                    loader: 'file-loader',
+                    loader: "file-loader",
                     options: {
                         limit: 10000,
-                        name: isProduction ? 'medias/[name].[ext]' : 'medias/[name].[hash:7].[ext]'
+                        name: isProduction ? "styles/medias/[name].[ext]" : "styles/medias/[name].[hash:7].[ext]"
                     }
                 }
             },
             {
                 test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
                 use: {
-                    loader: 'file-loader',
+                    loader: "file-loader",
                     options: {
                         limit: 10000,
-                        name: isProduction ? 'fonts/[name].[ext]' : 'fonts/[name].[hash:7].[ext]',
+                        name: isProduction ? "styles/fonts/[name].[ext]" : "styles/fonts/[name].[hash:7].[ext]",
                     }
                 }
             }
