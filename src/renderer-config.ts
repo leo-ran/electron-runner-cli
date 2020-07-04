@@ -101,7 +101,8 @@ let _rendererConfig: Configuration = {
                     loader: "file-loader",
                     options: {
                         limit: 10000,
-                        name: isProduction ? "styles/images/[name].[ext]" : "styles/images/[name].[hash:7].[ext]"
+                        name: isProduction ? "styles/images/[name].[ext]" : "styles/images/[name].[hash:7].[ext]",
+                        esModule: false,
                     }
                 }
             },
@@ -111,7 +112,8 @@ let _rendererConfig: Configuration = {
                     loader: "file-loader",
                     options: {
                         limit: 10000,
-                        name: isProduction ? "styles/medias/[name].[ext]" : "styles/medias/[name].[hash:7].[ext]"
+                        name: isProduction ? "styles/medias/[name].[ext]" : "styles/medias/[name].[hash:7].[ext]",
+                        esModule: false,
                     }
                 }
             },
@@ -122,6 +124,7 @@ let _rendererConfig: Configuration = {
                     options: {
                         limit: 10000,
                         name: isProduction ? "styles/fonts/[name].[ext]" : "styles/fonts/[name].[hash:7].[ext]",
+                        esModule: false,
                     }
                 }
             }
