@@ -22,7 +22,7 @@ program
 
     const {selectedPlatform} = await inquirer.prompt<{selectedPlatform: string}>({
         type: "list",
-        message: "选择安装工具",
+        message: "选择框架平台",
         choices: [
             "react",
             "vue"
