@@ -19,6 +19,18 @@ program
   .action(async (projectName: string) => {
     let template: string = "javascript";
     let installType: "npm" | "yarn" = "npm";
+
+    const {selectedPlatform} = await inquirer.prompt<{selectedPlatform: string}>({
+        type: "list",
+        message: "选择安装工具",
+        choices: [
+            "react",
+            "vue"
+        ],
+        default: 0,
+        name: "selectedPlatform"
+    })
+
     const {isTypescript} = await inquirer.prompt<{isTypescript: boolean}>({
       type: "confirm",
       name: "isTypescript",
@@ -57,7 +69,7 @@ program
     }
 
     const spinner = ora("开始下载模板文件").start();
-    download(`${repo}#react-${template}`, path.join(cwd, projectName), (err) => {
+    download(`${repo}#${selectedPlatform}-${template}`, path.join(cwd, projectName), (err) => {
       if(err){
         spinner.fail(`模板下载失败，或不存在模板${template}！`);
         throw err;
