@@ -38,12 +38,14 @@ const styleLoader = (isModule: boolean = false) => {
             ]
     );
 };
+
 const lessLoaderOption: RuleSetUseItem = {
     loader: "less-loader",
     options: {
         sourceMap: false,
     }
 }
+
 const sassLoaderOption: RuleSetUseItem = {
     loader: "sass-loader",
     options: {
@@ -51,6 +53,12 @@ const sassLoaderOption: RuleSetUseItem = {
         sourceMap: false,
     }
 }
+
+const tsLoaderOption: RuleSetUseItem = {
+    loader: "ts-loader",
+    options: {}
+}
+
 const devServerOption: DevServerConfiguration = {
     compress: true,
     port: 9080,
@@ -62,7 +70,7 @@ let _rendererConfig: Configuration = {
     entry: [sourcePath],
     resolve: {
         // Add `.ts` and `.tsx` as a resolvable extension.
-        extensions: [".ts", ".tsx", ".js", ".jsx", ".json", ".node"]
+        extensions: [".ts", ".tsx", ".js", ".jsx", ".vue", ".json", ".node"]
     },
     module: {
         rules: [
@@ -73,13 +81,6 @@ let _rendererConfig: Configuration = {
             {
                 test: /\.module.css$/,
                 use: styleLoader(true)
-            },
-            {
-                test: /\.tsx?$/,
-                exclude: /node_modules/,
-                use: [
-                    "ts-loader",
-                ]
             },
             {
                 test: /\.m?jsx?$/,
@@ -211,6 +212,14 @@ function createSassConfig(sassLoaderOption: RuleSetUseItem) {
     ]
 }
 
+function createTsConfig(...tsLoaderOptions: RuleSetUseItem[]) {
+    return {
+        test: /\.tsx?$/,
+        exclude: /node_modules/,
+        use: [...tsLoaderOptions]
+    };
+}
+
 if (_rendererConfig.module) {
     if (fs.existsSync(reConfigPath)) {
         const config: ElectronRunnerConfig = require(reConfigPath);
@@ -227,11 +236,25 @@ if (_rendererConfig.module) {
                 _rendererConfig.module.rules.push(...createSassConfig(sassLoaderOption))
             }
 
+            if (typeof config.ts === "function") {
+                _rendererConfig.module.rules.push(createTsConfig(...config.ts(tsLoaderOption)))
+            } else {
+                _rendererConfig.module.rules.push(createTsConfig(tsLoaderOption))
+            }
+
             if (config.devServer) {
                 _rendererConfig.devServer = {
                     ..._rendererConfig.devServer,
                     ...config.devServer,
                 }
+            }
+
+            if (typeof config.overwriteLoaders === "function") {
+                _rendererConfig.module.rules = config.overwriteLoaders(_rendererConfig.module.rules);
+            }
+
+            if (typeof config.overwritePlugins === "function") {
+                _rendererConfig.plugins = config.overwritePlugins(_rendererConfig.plugins||[]);
             }
 
             if (config.webpack) {
@@ -240,13 +263,15 @@ if (_rendererConfig.module) {
         } else {
             _rendererConfig.module.rules.push(
                 ...createLessConfig(lessLoaderOption),
-                ...createSassConfig(sassLoaderOption)
+                ...createSassConfig(sassLoaderOption),
+                createTsConfig(tsLoaderOption)
             )
         }
     } else {
         _rendererConfig.module.rules.push(
             ...createLessConfig(lessLoaderOption),
-            ...createSassConfig(sassLoaderOption)
+            ...createSassConfig(sassLoaderOption),
+            createTsConfig(tsLoaderOption)
         )
     }
 }
