@@ -10,7 +10,7 @@ export const mainConfig: Configuration = {
   output:{
     filename:  "[name].js",
     libraryTarget: "commonjs2",
-    path: path.join(cwd, "dist", "main")
+    path: path.join(cwd, "dist")
   },
   module:{
     rules:[

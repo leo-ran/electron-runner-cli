@@ -10,7 +10,6 @@ import fs from "fs";
 import {ElectronRunnerConfig} from "./index";
 
 const isProduction = process.env.NODE_ENV === 'production';
-const buildType = (process.env.NODE_RENDERER_TYPE || "web") as "web" | "electron-renderer";
 const cwd = process.cwd();
 const sourcePath = path.join(cwd, "src", "renderer");
 const styleLoader = (isModule: boolean = false) => {
@@ -29,7 +28,12 @@ const styleLoader = (isModule: boolean = false) => {
     return (
         isProduction ?
             [
-                MiniCssExtractPlugin.loader,
+                {
+                    loader: MiniCssExtractPlugin.loader,
+                    options: {
+                        publicPath: '../../'
+                    }
+                },
                 cssLoader
             ] :
             [
@@ -101,7 +105,7 @@ let _rendererConfig: Configuration = {
                     loader: "file-loader",
                     options: {
                         limit: 10000,
-                        name: isProduction ? "styles/images/[name].[ext]" : "styles/images/[name].[hash:7].[ext]",
+                        name: isProduction ? "/assets/images/[name].[ext]" : "/assets/images/[name].[hash:7].[ext]",
                         esModule: false,
                     }
                 }
@@ -112,7 +116,7 @@ let _rendererConfig: Configuration = {
                     loader: "file-loader",
                     options: {
                         limit: 10000,
-                        name: isProduction ? "styles/medias/[name].[ext]" : "styles/medias/[name].[hash:7].[ext]",
+                        name: isProduction ? "/assets/medias/[name].[ext]" : "/assets/medias/[name].[hash:7].[ext]",
                         esModule: false,
                     }
                 }
@@ -123,7 +127,7 @@ let _rendererConfig: Configuration = {
                     loader: "file-loader",
                     options: {
                         limit: 10000,
-                        name: isProduction ? "styles/fonts/[name].[ext]" : "styles/fonts/[name].[hash:7].[ext]",
+                        name: isProduction ? "/assets/fonts/[name].[ext]" : "/assets/fonts/[name].[hash:7].[ext]",
                         esModule: false,
                     }
                 }
@@ -132,8 +136,9 @@ let _rendererConfig: Configuration = {
     },
     output: {
         path: path.join(cwd, "dist", "renderer"),
-        filename: `[name].js`,
-        libraryTarget: 'umd'
+        filename: `assets/js/[name].js`,
+        libraryTarget: 'umd',
+        publicPath: "./"
     },
     node: {
         __dirname: false,
@@ -152,7 +157,7 @@ let _rendererConfig: Configuration = {
             ] : [
                 // https://github.com/webpack-contrib/mini-css-extract-plugin
                 new MiniCssExtractPlugin({
-                    filename: "styles/[name].css"
+                    filename: "assets/styles/[name].css",
                 }),
                 // https://github.com/NMFR/optimize-css-assets-webpack-plugin
                 new OptimizeCssAssetsPlugin({})
@@ -168,10 +173,10 @@ let _rendererConfig: Configuration = {
                     name: "vendors",
                     chunks: "all"
                 }
-            }
+            },
         } : false
     },
-    target: buildType,
+    target: "electron-preload",
     stats: isProduction ? "normal" : "errors-warnings",
     devServer: devServerOption,
 };
