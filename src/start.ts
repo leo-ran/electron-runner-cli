@@ -89,7 +89,7 @@ function runRendererBundle(): Promise<any> {
  */
 function startElectron(){
     spinner.succeed("启动Electron进程中...")
-    mainProcess = spawn(electron,[path.resolve("dist","main.js")])
+    mainProcess = spawn(electron,[path.resolve("dist", "application", "main.js")])
     mainProcess.stdout.on('data',data=>{
         let text = ''
         data = data.toString().split(/\r?\n/)

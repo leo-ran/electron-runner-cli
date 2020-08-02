@@ -53,7 +53,8 @@ const lessLoaderOption: RuleSetUseItem = {
 const sassLoaderOption: RuleSetUseItem = {
     loader: "sass-loader",
     options: {
-        implementation: require('sass'),
+        // Cancel default require sass.
+        // implementation: require('sass'),
         sourceMap: false,
     }
 }
@@ -69,7 +70,7 @@ const devServerOption: DevServerConfiguration = {
     stats: isProduction ? "normal" : "errors-warnings",
 }
 
-let _rendererConfig: Configuration = {
+let config: Configuration = {
     mode: isProduction ? "production" : "development",
     entry: [sourcePath],
     resolve: {
@@ -101,33 +102,48 @@ let _rendererConfig: Configuration = {
             },
             {
                 test: /\.(png|jpe?g|gif|svg)(\?.*)?$/,
-                use: {
+                use: isProduction ? {
                     loader: "file-loader",
                     options: {
                         limit: 10000,
-                        name: isProduction ? "/assets/images/[name].[ext]" : "/assets/images/[name].[hash:7].[ext]",
+                        name: "assets/images/[name].[ext]",
+                        esModule: false,
+                    }
+                }: {
+                    loader: "url-loader",
+                    options: {
                         esModule: false,
                     }
                 }
             },
             {
                 test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
-                use: {
+                use: isProduction ? {
                     loader: "file-loader",
                     options: {
                         limit: 10000,
-                        name: isProduction ? "/assets/medias/[name].[ext]" : "/assets/medias/[name].[hash:7].[ext]",
+                        name: "assets/medias/[name].[ext]",
+                        esModule: false,
+                    }
+                }: {
+                    loader: "url-loader",
+                    options: {
                         esModule: false,
                     }
                 }
             },
             {
                 test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
-                use: {
+                use: isProduction ? {
                     loader: "file-loader",
                     options: {
                         limit: 10000,
-                        name: isProduction ? "/assets/fonts/[name].[ext]" : "/assets/fonts/[name].[hash:7].[ext]",
+                        name: "assets/fonts/[name].[ext]",
+                        esModule: false,
+                    }
+                }: {
+                    loader: "url-loader",
+                    options: {
                         esModule: false,
                     }
                 }
@@ -135,10 +151,10 @@ let _rendererConfig: Configuration = {
         ],
     },
     output: {
-        path: path.join(cwd, "dist", "renderer"),
+        path: path.join(cwd, "dist", "application", "renderer"),
         filename: `assets/js/[name].js`,
         libraryTarget: 'umd',
-        publicPath: "./"
+        publicPath: isProduction ? "./" : "/"
     },
     node: {
         __dirname: false,
@@ -176,11 +192,10 @@ let _rendererConfig: Configuration = {
             },
         } : false
     },
-    target: "electron-preload",
+    target: "electron-renderer",
     stats: isProduction ? "normal" : "errors-warnings",
     devServer: devServerOption,
 };
-const reConfigPath = path.join(cwd, "electron.config.js");
 
 function createLessConfig(lessLoaderOption: RuleSetUseItem) {
     return [
@@ -188,7 +203,7 @@ function createLessConfig(lessLoaderOption: RuleSetUseItem) {
             test: /\.less$/,
             use: [
                 ...styleLoader(),
-                lessLoaderOption,
+                lessLoaderOption
             ]
         },
         {
@@ -200,7 +215,6 @@ function createLessConfig(lessLoaderOption: RuleSetUseItem) {
         },
     ]
 }
-
 function createSassConfig(sassLoaderOption: RuleSetUseItem) {
     return [
         {
@@ -219,7 +233,6 @@ function createSassConfig(sassLoaderOption: RuleSetUseItem) {
         },
     ]
 }
-
 function createTsConfig(...tsLoaderOptions: RuleSetUseItem[]) {
     return {
         test: /\.tsx?$/,
@@ -228,60 +241,60 @@ function createTsConfig(...tsLoaderOptions: RuleSetUseItem[]) {
     };
 }
 
-if (_rendererConfig.module) {
-    if (fs.existsSync(reConfigPath)) {
-        const config: ElectronRunnerConfig = require(reConfigPath);
-        if (typeof config === "object") {
-            if (typeof config.less === "function") {
-                _rendererConfig.module.rules.push(...createLessConfig(config.less(lessLoaderOption)))
-            } else {
-                _rendererConfig.module.rules.push(...createLessConfig(lessLoaderOption))
-            }
+const restConfigFilePath = path.resolve("electron.config.js");
 
-            if (typeof config.sass === "function") {
-                _rendererConfig.module.rules.push(...createSassConfig(config.sass(sassLoaderOption)))
-            } else {
-                _rendererConfig.module.rules.push(...createSassConfig(sassLoaderOption))
-            }
+// less设置
+let lessConfig: RuleSetUseItem = lessLoaderOption;
+// sass设置
+let sassConfig: RuleSetUseItem = sassLoaderOption;
+// ts设置
+let tsConfigs: RuleSetUseItem[] = [
+    tsLoaderOption
+];
 
-            if (typeof config.ts === "function") {
-                _rendererConfig.module.rules.push(createTsConfig(...config.ts(tsLoaderOption)))
-            } else {
-                _rendererConfig.module.rules.push(createTsConfig(tsLoaderOption))
-            }
-
-            if (config.devServer) {
-                _rendererConfig.devServer = {
-                    ..._rendererConfig.devServer,
-                    ...config.devServer,
-                }
-            }
-
-            if (typeof config.overwriteLoaders === "function") {
-                _rendererConfig.module.rules = config.overwriteLoaders(_rendererConfig.module.rules);
-            }
-
-            if (typeof config.overwritePlugins === "function") {
-                _rendererConfig.plugins = config.overwritePlugins(_rendererConfig.plugins||[]);
-            }
-
-            if (config.webpack) {
-                _rendererConfig = merge(_rendererConfig, config.webpack)
-            }
-        } else {
-            _rendererConfig.module.rules.push(
-                ...createLessConfig(lessLoaderOption),
-                ...createSassConfig(sassLoaderOption),
-                createTsConfig(tsLoaderOption)
-            )
+if (fs.existsSync(restConfigFilePath)) {
+    const _config: ElectronRunnerConfig = require(restConfigFilePath);
+    if (typeof _config === "object") {
+        if (typeof _config.less === "function") {
+            lessConfig = _config.less(lessLoaderOption)
         }
-    } else {
-        _rendererConfig.module.rules.push(
-            ...createLessConfig(lessLoaderOption),
-            ...createSassConfig(sassLoaderOption),
-            createTsConfig(tsLoaderOption)
-        )
+
+        if (typeof _config.sass === "function") {
+            sassConfig = _config.sass(sassLoaderOption)
+        }
+
+
+        if (typeof _config.ts === "function") {
+            tsConfigs = _config.ts(tsLoaderOption);
+        }
+
+        // 开发服务器
+        if (_config.devServer) {
+            config.devServer = {
+                ...config.devServer,
+                ..._config.devServer,
+            }
+        }
+
+        // 重写loaders
+        if (typeof _config.overwriteLoaders === "function") {
+            config.module = config.module || {rules: []};
+            config.module.rules = _config.overwriteLoaders(config.module?.rules || [])
+        }
+
+        // 重写 plugins
+        if (typeof _config.overwritePlugins === "function") {
+            config.plugins = _config.overwritePlugins(config.plugins || [])
+        }
+
+        if (_config.webpack) {
+            config = merge(config, _config.webpack);
+        }
     }
 }
 
-export const rendererConfig = _rendererConfig;
+config.module?.rules.push(...createLessConfig(lessConfig));
+config.module?.rules.push(...createSassConfig(sassConfig));
+config.module?.rules.push(createTsConfig(...tsConfigs));
+
+export const rendererConfig = config;
